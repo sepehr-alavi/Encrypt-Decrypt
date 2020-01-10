@@ -13,8 +13,10 @@ export default class App extends Component {
 
     }
       this.handleChange = this.handleChange.bind(this)    
+      this.generateKey = this.generateKey.bind(this)
+      this.encrypt = this.encrypt.bind(this)
+      this.decrypt = this.decrypt.bind(this)
   }
-
   
 
   handleChange = ({target}) => {
@@ -28,10 +30,11 @@ export default class App extends Component {
     else if(!message) 
       alert('Enter a message!')
     else if(n && message) {
-        axios.post('localhost:5000/encrypt', {message: message, public_key: { n: n, e: e}}).then(res => {
+        axios.post('https://localhost:5000/encrypt', {message: message, public_key: { n: n, e: e}}).then(res => {
+
           alert(`encrypted message : ${res.encrypted_message}  time : ${res.time_elapsed}` )
-        }
-        )
+        })
+        
     }
   }
 
@@ -42,22 +45,19 @@ export default class App extends Component {
     else if(!message) 
       alert('Enter a message!')
     else if(n && message) {
-        axios.post('localhost:5000/decrypt', {message: message, private_key: { n: n, d: d}}).then(res => {
+        axios.post('https://localhost:5000/decrypt', {message: message, private_key: { n: n, d: d}}).then(res => {
           alert(`encrypted message : ${res.decrypted_message}  time : ${res.time_elapsed}` )
-        }
-        )
+        })
     }
   }
   
   generateKey = () => {
     const { length } = this.state
-    if( length.match(/(^[0-9]*$)/g) && length >= 4 && length <= 64) {
-      axios.get(`localhost:5000/generate_keys?length=${length}`)
-      .then(res => {
-        this.setState({n: res.n, e: res.e, de: res.d })
-        alert('Key generated!')
-      })
-    }
+    if( (length.match(/(^[0-9]*$)/g) && length >= 4 && length <= 64) || length === '') {
+      axios.get(`https://localhost:5000/generate?length=${length}`).then(res => {
+      this.setState({n: res.n, e: res.e, de: res.d })
+      alert('Key generated!')
+    })}
     else 
       alert('length should be a number between 4 and 64')
   }
