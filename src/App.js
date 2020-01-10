@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
+import axios from 'axios'
 
 export default class App extends Component {
   constructor() {
     super()
     this.state = {
-      input: ''
+      message: '',
+      n: '',
+      d: '',
+      e: '',
+      length: ''
 
     }
       this.handleChange = this.handleChange.bind(this)    
@@ -13,33 +18,71 @@ export default class App extends Component {
   
 
   handleChange = ({target}) => {
-    this.setState({input: target.value})
+    this.setState({ [target.id] : target.value})
   }
 
-  handleSubmit = () => {}
+  encrypt = () => {
+    const { message , n, e} = this.state
+    if(!n) 
+      alert('You need to generate a key first!')
+    else if(!message) 
+      alert('Enter a message!')
+    else if(n && message) {
+        axios.post('localhost:5000/encrypt', {message: message, public_key: { n: n, e: e}}).then(res => {
+          alert(`encrypted message : ${res.encrypted_message}  time : ${res.time_elapsed}` )
+        }
+        )
+    }
+  }
 
-  encode = () => {}
-
-  decode = () => {}
+  decrypt = () => {
+    const { message, n, d } = this.state
+    if(!n) 
+      alert('You need to generate a key first!')
+    else if(!message) 
+      alert('Enter a message!')
+    else if(n && message) {
+        axios.post('localhost:5000/decrypt', {message: message, private_key: { n: n, d: d}}).then(res => {
+          alert(`encrypted message : ${res.decrypted_message}  time : ${res.time_elapsed}` )
+        }
+        )
+    }
+  }
   
+  generateKey = () => {
+    const { length } = this.state
+    if( length.match(/(^[0-9]*$)/g) && length >= 4 && length <= 64) {
+      axios.get(`localhost:5000/generate_keys?length=${length}`)
+      .then(res => {
+        this.setState({n: res.n, e: res.e, de: res.d })
+        alert('Key generated!')
+      })
+    }
+    else 
+      alert('length should be a number between 4 and 64')
+  }
+
   render() {
+    console.log(this.state)
     return (
       <div className='body'>
         <div className='header'>
-          <h1>Encoder/Decoder</h1>
+          <h1>Encrypt/Decrypt</h1>
         </div>
         <div className='container'>
 
-          <form>
-            <input onChange={this.handleChange} placeholder='Enter your message' />
-          </form>
+          <input id="message" className="message" onChange={this.handleChange} placeholder='Enter your message' />
+          <div className="generator">
+            <input id="length" type="tel" className="key" onChange={this.handleChange} placeholder='Enter the length of key' />
+            <div className="generator-button" onClick={this.generateKey}>Generate</div>
+          </div>
           <div className='button-container'>
-            <div className='button style-1' >
-              Encode
+            <div className='button style-1' onClick={this.encrypt}>
+              Encrypt
             </div>
 
-            <div className='button style-2' >
-              Decode
+            <div className='button style-2' onClick={this.decrypt}>
+              Decrypt
             </div>
           </div>
 
@@ -76,6 +119,7 @@ export default class App extends Component {
                 font-size: 16px;
                 text-align: left;
                 transition: 0.3s all;
+                margin-bottom: 16px;
               }
               input:hover {
                 border: 1px solid #4a90e2;
@@ -89,14 +133,35 @@ export default class App extends Component {
                 color: #ccc;
               }
 
+              .generator {
+                width: 100%;
+                text-align: left;
+                position: relative;
+              }
+              input.key {
+                width: 75%;
+              }
+              .generator-button {
+                position: absolute;
+                right: -32px;
+                top: 0;
+                height: 40px;
+                border-radius: 4px;
+                width: 23%;
+                margin-left: 16px;
+                text-align: center;
+                background-color: black;
+                color: white;
+                line-height: 40px;
+                cursor: pointer;
+              }
               .button-container {
                 display: grid;
                 list-style: none;
                 grid-template-columns: 1fr 1fr;
                 grid-column-gap: 16px;
-                grid-row-gap: 8px;
-                margin-top: 32px;
-                padding-left: 16px;
+                margin-top: 16px;
+                padding-left: 32px;
               }
 
               .button {
