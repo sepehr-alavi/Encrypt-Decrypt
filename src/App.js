@@ -56,7 +56,7 @@ export default class App extends Component {
     if( (length.match(/(^[0-9]*$)/g) && length >= 4 && length <= 64) || length === '') {
       axios.get(`http://localhost:5000/generate_keys?length=${length}`).then(res => {
         console.log(res)
-      this.setState({n: res.data.n, e: res.data.e, de: res.data.d })
+      this.setState({n: res.data.n, e: res.data.e, d: res.data.d })
       alert('Key generated!')
     })}
     else 
