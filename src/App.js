@@ -30,9 +30,9 @@ export default class App extends Component {
     else if(!message) 
       alert('Enter a message!')
     else if(n && message) {
-        axios.post('https://localhost:5000/encrypt', {message: message, public_key: { n: n, e: e}}).then(res => {
+        axios.post('http://localhost:5000/encrypt', {message: message, public_key: { n: n, e: e}, separate_length: 6}).then(res => {
 
-          alert(`encrypted message : ${res.encrypted_message}  time : ${res.time_elapsed}` )
+          alert(`encrypted message : ${res.data.encrypted_message}  time : ${res.data.time_elapsed}` )
         })
         
     }
@@ -45,8 +45,8 @@ export default class App extends Component {
     else if(!message) 
       alert('Enter a message!')
     else if(n && message) {
-        axios.post('https://localhost:5000/decrypt', {message: message, private_key: { n: n, d: d}}).then(res => {
-          alert(`encrypted message : ${res.decrypted_message}  time : ${res.time_elapsed}` )
+        axios.post('http://localhost:5000/decrypt', {message: message, private_key: { n: n, d: d}}).then(res => {
+          alert(`encrypted message : ${res.data.decrypted_message}  time : ${res.data.time_elapsed}` )
         })
     }
   }
@@ -54,8 +54,9 @@ export default class App extends Component {
   generateKey = () => {
     const { length } = this.state
     if( (length.match(/(^[0-9]*$)/g) && length >= 4 && length <= 64) || length === '') {
-      axios.get(`https://localhost:5000/generate?length=${length}`).then(res => {
-      this.setState({n: res.n, e: res.e, de: res.d })
+      axios.get(`http://localhost:5000/generate_keys?length=${length}`).then(res => {
+        console.log(res)
+      this.setState({n: res.data.n, e: res.data.e, de: res.data.d })
       alert('Key generated!')
     })}
     else 
